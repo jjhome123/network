@@ -1,12 +1,35 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
-    <ul>
-        {% for listing in listings %}        
-            <li>{{ listing }}</li>
-        {% empty %}
-        <li>No listings.</li>
-        {% endfor %}
-    </ul>
+    <h2>Active Listings</h2>    
+    {% for listing in listings %}
+        {% if listing.active %}
+        <li class="media border py-2">
+            <img class="mr-3 thumbnail" src="{{ listing.image_URL }}" alt="image of listing">
+            <div class="media-body">
+                <h5 class="mt-0 mb-1"><a href="{% url 'listing' listing.pk %}">{{ listing.title }}</a></h5>
+                <p><strong>Price:</strong> ${{ listing.bids.amount }}</p>
+                {{ listing.description }}
+                <br><br>
+                <p>Created {{ listing.datetime }}</p>
+            </div>
+        </li>
+        {% endif %}
+    {% endfor %}
+    
+    <h2>Past Listings</h2>
+    {% for listing in listings %}
+        {% if not listing.active %}
+        <li class="media border py-2">
+            <img class="mr-3 thumbnail" src="{{ listing.image_URL }}" alt="image of listing">
+            <div class="media-body">
+                <h5 class="mt-0 mb-1"><a href="{% url 'listing' listing.pk %}">{{ listing.title }} {% if not listing.active %}(ended){% endif %}</a></h5>
+                <p><strong>Price:</strong> ${{ listing.bids.amount }}</p>
+                {{ listing.description }}
+                <br><br>
+                <p>Created {{ listing.datetime }}</p>
+            </div>
+        </li>
+        {% endif %}
+    {% endfor %}
 {% endblock %}
