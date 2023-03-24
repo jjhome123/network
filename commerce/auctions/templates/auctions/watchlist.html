@@ -4,7 +4,7 @@
 <h2>Watchlist</h2>
 <ul>
 {% for listing in listings %}
-{% if listing.is_watchlist %}
+{% if listing %}
     <li><a href="{% url 'listing' listing.pk %}">{{ listing.title }}</a></li>
 {% endif %}
 {% endfor %}

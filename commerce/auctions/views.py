@@ -105,13 +105,8 @@ def listing(request, id):
             listing.bids.save()
         elif request.POST.get("close"):
             listing.active = False
-            listing.save()
-        elif request.POST.get("watchlist") and not listing.is_watchlist:
-            listing.is_watchlist = True
-            listing.save()
-        elif request.POST.get("watchlist") and listing.is_watchlist:
-            listing.is_watchlist = False
-            listing.save()
+            listing.save()       
+
         return render(request, "auctions/listing.html", {
             'listing': Listing.objects.get(pk=id)
         }) 
@@ -119,10 +114,8 @@ def listing(request, id):
         'listing': Listing.objects.get(pk=id)
     })
 
-
 def error(request):
     return render(request, "auctions/error.html")
-
 
 def watchlist(request):
     return render(request, "auctions/watchlist.html", {

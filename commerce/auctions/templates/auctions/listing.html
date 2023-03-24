@@ -2,7 +2,7 @@
 
 {% block body %}
 <h2>Listing: {{ listing.title }}</h2>
-{% if not listing.is_watchlist %}
+{% if not listing.watchlist %}
 <form action="{% url 'listing' listing.pk %}" method="POST">
     {% csrf_token %}
     <input type="submit" name="watchlist" Value="Add to Watchlist">
