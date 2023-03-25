@@ -17,15 +17,24 @@ class Bid(models.Model):
 
 class Listing(models.Model):
     active = models.BooleanField(default=True)
-    bids = models.ForeignKey(Bid, on_delete=models.CASCADE, related_name="item", null=True, default=None)
+    bids = models.ForeignKey(Bid, on_delete=models.CASCADE, related_name="item", blank=True, null=True, default=None)
     datetime = models.DateTimeField(auto_now=True)
     description = models.CharField(max_length=2000)
     image_URL = models.URLField(blank=True)
     lister = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, default=None)
     title = models.CharField(max_length=64)
-    
+
     def __str__(self):
-        return f"{self.lister} {self.title}"
+        return f"{self.id} | {self.title}"
+
+
+class Watchlist(models.Model):
+    watcher = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, default=None)
+    is_watchlist = models.BooleanField(default=False)
+    item = models.ForeignKey(Listing, on_delete=models.CASCADE, null=True, default=None)
+
+    def __str__(self):
+        return f"{self.item} is in {self.watcher}'s watchlist: {self.is_watchlist}"
 
 
 class Comments():

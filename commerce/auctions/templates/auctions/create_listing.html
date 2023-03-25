@@ -5,14 +5,14 @@
     {% if user.is_authenticated %}
         <form action="{% url 'new_listing' %}" method="POST">
             {% csrf_token %}
-            <h2>Title of Listing</h2>
-            <input name="title"><br>
-            <h2>Description</h2>
+            <h3>Title of Listing</h3>
+            <input name="title" placeholder="Title"><br>
+            <h3>Description</h3>
             <textarea name="description" placeholder="Listing description..."></textarea>
             <h2>Starting Bid</h2>
-            $<input name="price" type="number" step="0.01"><br>
-            <h2>(Optional) Add an Image</h2>
-            <input type="url" name="image_URL" autocomplete="off" type="text"><br>
+            $<input name="price" type="number" step="0.01" placeholder="00.00"><br>
+            <h2>(Optional) Add an Image URL</h2>
+            <input type="url" name="image_URL" autocomplete="off" type="text" placeholder="URL"><br>
             <input type="submit" value="Create Listing">
         </form>
     {% else %}
