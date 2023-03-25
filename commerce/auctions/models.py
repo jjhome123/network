@@ -38,6 +38,7 @@ class Comment(models.Model):
     def __str__(self):
         return f"{self.comment}"
 
+
 class Watchlist(models.Model):
     watcher = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, default=None)
     is_watchlist = models.BooleanField(default=False)
