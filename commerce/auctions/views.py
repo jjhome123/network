@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
-from .models import User, Listing, Bid, Watchlist
+from .models import User, Listing, Bid, Watchlist, Comment
 
 
 def index(request):
@@ -77,11 +77,19 @@ def create_listing(request):
             price = 0
         else:
             price = request.POST["price"]
+        if request.POST["title"] == '':
+            title = 'Untitled'
+        else:
+            title=request.POST["title"]
+        if request.POST["description"] == '':
+            description = 'No description for this listing.'
+        else:
+            description = request.POST["description"]
         bid = Bid(amount=price,n=0)
         listing = Listing(
             lister=User.objects.get(username=request.user),
-            title=request.POST["title"],
-            description=request.POST["description"],
+            title=title,
+            description=description,
             image_URL=URL,
             bids=bid,
             watchlist=None,
@@ -97,8 +105,8 @@ def create_listing(request):
 
 def listing(request, id):
     if request.method == "POST":
-        print(request.POST)
         listing = Listing.objects.get(pk=id)
+        c = Comment.objects.filter(item=listing)
         try:
             w = Watchlist.objects.get(watcher=request.user, item=Listing.objects.get(pk=id))
         except:
@@ -114,30 +122,32 @@ def listing(request, id):
         elif request.POST.get("add_watchlist"):
             try: 
                 w = Watchlist.objects.get(watcher=request.user, item=listing, is_watchlist=False)
-                print('Watchlist exists for this listing and user. Setting to true...')
                 w.is_watchlist = True
                 w.save()
             except:
-                print('Exception was Raised. Creating new Watchlist object...')
                 w = Watchlist(watcher=request.user, item=listing, is_watchlist=True)
-                print(w)
                 w.save()    
         elif request.POST.get("remove_watchlist"):
             w = Watchlist.objects.get(watcher=request.user, item=listing, is_watchlist=True)
-            print('Watchlist found. Removing from watchlist...')
             w.is_watchlist = False
             w.delete()
+        elif request.POST.get("add_comment"):
+            c = Comment(commenter=request.user, item=listing, comment=request.POST.get("add_comment"))
+            c.save()
         return render(request, "auctions/listing.html", {
             'listing': Listing.objects.get(pk=id),
-            'watchlist': w
+            'watchlist': w,
+            'comments': Comment.objects.filter(item=Listing.objects.get(pk=id))
         }) 
+    c = Comment.objects.filter(item=Listing.objects.get(pk=id))
     try:
         w = Watchlist.objects.get(watcher=request.user, item=Listing.objects.get(pk=id))
     except:
         w = None
     return render(request, "auctions/listing.html", {
         'listing': Listing.objects.get(pk=id),
-        'watchlist': w
+        'watchlist': w,
+        'comments': c
     })
 
 
@@ -151,7 +161,6 @@ def categories(request):
     for listing in l:
         categories.append(listing.category)
     categories=set(categories)
-    print(categories)
     return render(request, "auctions/categories.html", {
         'categories': categories
     })

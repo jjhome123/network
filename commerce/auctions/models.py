@@ -29,6 +29,15 @@ class Listing(models.Model):
         return f"{self.id} | {self.title}"
 
 
+class Comment(models.Model):
+    commenter = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, default=None)
+    comment = models.CharField(max_length=2000)
+    item = models.ForeignKey(Listing, on_delete=models.CASCADE, null=True, default=None)
+    datetime = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.comment}"
+
 class Watchlist(models.Model):
     watcher = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, default=None)
     is_watchlist = models.BooleanField(default=False)
@@ -37,6 +46,3 @@ class Watchlist(models.Model):
     def __str__(self):
         return f"{self.item} is in {self.watcher}'s watchlist: {self.is_watchlist}"
 
-
-class Comments():
-    pass
