@@ -84,7 +84,8 @@ def create_listing(request):
             description=request.POST["description"],
             image_URL=URL,
             bids=bid,
-            watchlist=None
+            watchlist=None,
+            category=request.POST["category"]
         )
         bid.save()
         listing.save()
@@ -142,6 +143,25 @@ def listing(request, id):
 
 def error(request):
     return render(request, "auctions/error.html")
+
+
+def categories(request):
+    l = Listing.objects.all()
+    categories = []
+    for listing in l:
+        categories.append(listing.category)
+    categories=set(categories)
+    print(categories)
+    return render(request, "auctions/categories.html", {
+        'categories': categories
+    })
+
+
+def c_listings(request, category):
+    l = Listing.objects.filter(category=category)
+    return render(request, "auctions/c_listings.html", {
+        'listings': l
+    })
 
 
 def watchlist(request):

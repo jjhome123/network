@@ -23,6 +23,7 @@ class Listing(models.Model):
     image_URL = models.URLField(blank=True)
     lister = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, default=None)
     title = models.CharField(max_length=64)
+    category = models.CharField(max_length=64, blank=True, null=True, default=None)
 
     def __str__(self):
         return f"{self.id} | {self.title}"

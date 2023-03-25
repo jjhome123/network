@@ -2,6 +2,7 @@
 
 {% block body %}
 <h2>Listing: {{ listing.title }}</h2>
+{% if user.is_authenticated %}
 {% if not watchlist.is_watchlist %}
 <form action="{% url 'listing' listing.pk %}" method="POST">
     {% csrf_token %}
@@ -12,6 +13,7 @@
     {% csrf_token %}
     <input type="submit" name="remove_watchlist" Value="Remove from Watchlist">
 </form>
+{% endif %}
 {% endif %}
 <img src="{{ listing.image_URL }}"><br>
 <h5>{{ listing.description }}</h5>
@@ -40,5 +42,9 @@
     <input type="submit" name="close" value="Close Listing">
 </form>
 {% endif %}
-<p>Posted by {{ listing.lister }} on {{ listing.datetime }}</p>
+<h2>Details</h2>
+<ul>
+    <li>Posted by {{ listing.lister }} on {{ listing.datetime }}</li>
+    <li>Category: {{ listing.category }}</li>
+</ul>
 {% endblock %}
