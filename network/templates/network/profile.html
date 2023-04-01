@@ -2,7 +2,6 @@
 
 {% block body %}
     <h2>{{ user }}'s Profile</h2>
-    {% if request.user.username != user %}
     <table>
         <thead>
             <tr>
@@ -17,6 +16,7 @@
             </tr>
         </tbody>
     </table><br>
+    {% if request.user.username != user and request.user.is_authenticated %}
     <button id="follow">Follow</button>
     {% endif %}
     <div class="posts">
@@ -24,11 +24,15 @@
         <div class="border m-3 p-3">
             <h5>{{ post.poster }}</h5>
             {% if request.user == post.poster %}
-                {% if request.user.is_authenticated %}
-                <a href="#">Edit</a><br>
-                {% endif %}
+                <a href="#" id="edit_post{{ post.pk }}" class="edit" data-post_id="{{ post.pk }}">Edit</a><br>
+                <form action="{% url 'profile' request.user %}" method="POST" id="edit_field{{ post.pk }}" class="edit_field">
+                    {% csrf_token %}
+                    <textarea name="post_contents" class="form-control">{{ post.post }}</textarea><br>
+                    <input type="hidden" name="post_id" value="{{post.pk}}">
+                    <button type="submit">Save Changes</button>
+                </form>
             {% endif %}
-            {{ post.post }}<br>
+            <div id="post_body{{ post.pk }}">{{ post.post }}</div><br>
             <div class="text-muted">{{ post.datetime }}</div>
             <a href="#">Comment</a>
         </div>

@@ -10,7 +10,12 @@ from .models import User, Post, Like, Follow
 def index(request):
     posts = Post.objects.all()
     if request.method == "POST":
-        if not request.POST["post"]:
+        if request.POST.get("post_contents"):
+            p = Post(pk=request.POST.get("post_id"), poster=request.user)
+            p.post = request.POST.get("post_contents")
+            p.save()
+            
+        elif not request.POST.get("new_post"):
             return render(request, "network/index.html",{
                 "posts": posts,
                 "message": "Error: Blank posts are not allowed."
@@ -23,7 +28,11 @@ def index(request):
     })
 
 def profile(request, user):
-    print(request.user.is_authenticated)
+    if request.method == 'POST':
+        if request.POST.get("post_contents"):
+            p = Post(pk=request.POST.get("post_id"), poster=request.user)
+            p.post = request.POST.get("post_contents")
+            p.save()
     profile_user = User.objects.get(username=user)
     posts = Post.objects.filter(poster=profile_user)
     return render(request, "network/profile.html",{
