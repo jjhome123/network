@@ -4,11 +4,32 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import User, Post, Like, Follow
 
 
 def index(request):
-    return render(request, "network/index.html")
+    posts = Post.objects.all()
+    if request.method == "POST":
+        if not request.POST["post"]:
+            return render(request, "network/index.html",{
+                "posts": posts,
+                "message": "Error: Blank posts are not allowed."
+            })
+        else:
+            p = Post(poster=request.user, post=request.POST["post"])
+            p.save()
+    return render(request, "network/index.html", {
+        "posts": posts
+    })
+
+def profile(request, user):
+    print(request.user.is_authenticated)
+    profile_user = User.objects.get(username=user)
+    posts = Post.objects.filter(poster=profile_user)
+    return render(request, "network/profile.html",{
+        "posts": posts,
+        "user": profile_user.username
+    })
 
 
 def login_view(request):
@@ -47,6 +68,10 @@ def register(request):
         if password != confirmation:
             return render(request, "network/register.html", {
                 "message": "Passwords must match."
+            })
+        elif '' in [email,username,password,confirmation]:
+            return render(request, "network/register.html", {
+                "message": "All fields must be filled in."
             })
 
         # Attempt to create new user

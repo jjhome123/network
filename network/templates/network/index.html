@@ -1,5 +1,31 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    TODO
+    <h2>All Posts</h2>
+    {% if request.user.is_authenticated %}
+    <div class="border p-3 m-3">
+        <form action="{% url 'index' %}" id="user_post" method="POST">
+            {% csrf_token %}
+            <h4>New post</h4>
+            <textarea class="form-control" placeholder="Enter new post here" required name="post"></textarea><br>
+            <input class="btn btn-primary" type="submit" value="Post">
+            {% if message %}
+            <strong>{{ message }}</strong>
+            {% endif %}
+        </form>
+    </div>
+    {% endif %}
+    <div class="posts">
+        {% for post in posts reversed %}
+        <div class="border m-3 p-3">
+            <h5><a href="{% url 'profile' post.poster.username %}">{{ post.poster }}</a></h5>
+            {% if request.user == post.poster %}
+                <a href="#">Edit</a><br>
+            {% endif %}
+            {{ post.post }}<br>
+            <div class="text-muted">{{ post.datetime }}</div>
+            <a href="#">Comment</a>
+        </div>
+        {% endfor %}
+    </div>
 {% endblock %}
