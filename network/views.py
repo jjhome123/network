@@ -5,26 +5,56 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.core.paginator import Paginator
 from .models import User, Post, Like, Follow
 
 
-def index(request):
-    posts = Post.objects.all().order_by('datetime')
+def time_sort(obj):
+    return obj.datetime
+
+
+def index(request, pg=1):
     if request.method == "POST":
         if request.POST.get("post_contents"):
             p = Post(pk=request.POST.get("post_id"), poster=request.user)
             p.post = request.POST.get("post_contents")
-            p.save()   
+            p.save()
+            posts = []
+            list = Post.objects.all().order_by('-datetime')
+            for item in list:
+                posts.append(item)
+            page = Paginator(posts, 10)
+            pages = range(1, page.num_pages+1)
         elif not request.POST.get("new_post"):
+            posts = []
+            list = Post.objects.all().order_by('-datetime')
+            for item in list:
+                posts.append(item)
+            page = Paginator(posts, 10)
+            pages = range(1, page.num_pages+1)
             return render(request, "network/index.html",{
-                "posts": posts,
-                "message": "Error: Blank posts are not allowed."
+                "posts": page.page(pg),
+                "message": "Error: Blank posts are not allowed.",
+                "pages": pages,
+                "current_page": pg,
+                "previous_page": pg-1,
+                "next_page": pg+1
             })
         else:
             p = Post(poster=request.user, post=request.POST.get("new_post"))
-            p.save()    
+            p.save()
+    posts = []
+    list = Post.objects.all().order_by('-datetime')
+    for item in list:
+        posts.append(item)
+    page = Paginator(posts, 10)
+    pages = range(1, page.num_pages+1)
     return render(request, "network/index.html", {
-        "posts": posts
+        "posts": page.page(pg),
+        "pages": pages,
+        "current_page": pg,
+        "previous_page": pg-1,
+        "next_page": pg+1
     })
 
 
@@ -157,9 +187,6 @@ def user(_, user):
         "following": Follow.objects.filter(user=profile_user).count()
     }, safe=False)
 
-
-def time_sort(obj):
-    return obj.datetime
 
 def following(request):
     f = Follow.objects.filter(user=request.user)

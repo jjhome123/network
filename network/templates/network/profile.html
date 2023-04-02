@@ -19,7 +19,7 @@
                     {% if not f_status %}
                     Follow
                     {% else %}
-                    Un-Follow
+                    Unfollow
                     {% endif %}
                     </button>
                     {% endif %}
@@ -50,7 +50,6 @@
                 <span><span class="like_num" id="like-count{{ post.pk }}" data-num_id="{{ post.pk }}">0</span> likes</span>
             </div>
             <div class="text-muted">{{ post.datetime }}</div>
-            <a href="#">Comment</a>
         </div>
         {% empty %}
         <div class="m-3 p-3">

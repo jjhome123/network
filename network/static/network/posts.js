@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Adds like functionality to like buttons on profile or index page
     likes();
 
+    // Adds pagination to views
+    
 });
 
 function edit_entry(post_id) {
