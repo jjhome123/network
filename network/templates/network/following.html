@@ -1,36 +1,12 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <h3 class="ml-3">{% if user == request.user.username %}Your Profile{% else %}{{ user }}{% endif %}</h3>
-    <table class="ml-3">
-        <thead>
-            <tr>
-                <th class="border p-1">Followers</th>
-                <th class="border p-1">Following</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td id="follower-num" class="border text-center">{{ followers }}</td>
-                <td id="following-num" class="border text-center">{{ following }}</td>
-                <td>
-                    {% if request.user.username != user and request.user.is_authenticated %}
-                    <button class="ml-3 btn btn-primary" id="follow">
-                    {% if not f_status %}
-                    Follow
-                    {% else %}
-                    Un-Follow
-                    {% endif %}
-                    </button>
-                    {% endif %}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<h3 class="ml-3">Posts from Users you Follow</h3>
+<div class="ml-3">
     <div class="posts">
         {% for post in posts reversed %}
         <div class="border m-3 p-3">
-            <h5>{{ post.poster }}</h5>
+            <h5><a href="{% url 'profile' post.poster.username %}">{{ post.poster }}</a></h5>
             {% if request.user == post.poster %}
                 <button id="edit_post{{ post.pk }}" class="edit btn btn-primary" data-post_id="{{ post.pk }}">Edit</button><br>
                 <form action="{% url 'index' %}" method="POST" id="edit_field{{ post.pk }}" class="edit_field">
@@ -58,4 +34,5 @@
         </div>
         {% endfor %}
     </div>
+</div>
 {% endblock %}

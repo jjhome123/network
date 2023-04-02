@@ -24,7 +24,7 @@ def index(request):
             p = Post(poster=request.user, post=request.POST.get("new_post"))
             p.save()    
     return render(request, "network/index.html", {
-        "posts": posts,
+        "posts": posts
     })
 
 
@@ -156,3 +156,18 @@ def user(_, user):
         "followers": Follow.objects.filter(following_user=profile_user).count(),
         "following": Follow.objects.filter(user=profile_user).count()
     }, safe=False)
+
+
+def time_sort(obj):
+    return obj.datetime
+
+def following(request):
+    f = Follow.objects.filter(user=request.user)
+    print(f)
+    fp = []
+    for user in f:
+        fp += Post.objects.filter(poster=user.following_user)
+    fp.sort(key=time_sort)
+    return render(request, "network/following.html", {
+        "posts": fp
+    })
