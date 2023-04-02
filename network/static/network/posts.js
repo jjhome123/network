@@ -8,6 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Adds follow functionality to follow button on profile page
+    follow();
+});
+
+function edit_entry(post_id) {
+    field = document.querySelector(`#edit_field${post_id}`);
+    post_body = document.querySelector(`#post_body${post_id}`)
+    field.style.display = 'block';
+    field.focus();
+    post_body.style.display = 'none';
+}
+
+function follow() {
     user = document.querySelector('h5').innerHTML;
     if (document.querySelector('h3').innerHTML !== 'Your Profile') {
         follow_button = document.querySelector('#follow');
@@ -41,12 +53,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-});
-
-function edit_entry(post_id) {
-    field = document.querySelector(`#edit_field${post_id}`);
-    post_body = document.querySelector(`#post_body${post_id}`)
-    field.style.display = 'block';
-    field.focus();
-    post_body.style.display = 'none';
 }
