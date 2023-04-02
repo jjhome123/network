@@ -29,6 +29,14 @@
                 </form>
             {% endif %}
             <div id="post_body{{ post.pk }}"><h3>{{ post.post }}</h3></div>
+            <div class="likes">
+                {% if request.user.is_authenticated %}
+                <span class="like_button" id="like{{ post.pk }}" data-like_id="{{ post.pk }}">🤍</span>
+                {% else %}
+                <span>❤️</span>
+                {% endif %}
+                <span><span class="like_num" id="like-count{{ post.pk }}" data-num_id="{{ post.pk }}">0</span> likes</span>
+            </div>
             <div class="text-muted">{{ post.datetime }}</div>
             <a href="#">Comment</a>
         </div>

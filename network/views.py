@@ -24,8 +24,9 @@ def index(request):
             p = Post(poster=request.user, post=request.POST.get("new_post"))
             p.save()    
     return render(request, "network/index.html", {
-        "posts": posts
+        "posts": posts,
     })
+
 
 @csrf_exempt
 def profile(request, user):
@@ -58,6 +59,39 @@ def profile(request, user):
         "following": following,
         "f_status": f_status
     })
+
+
+@csrf_exempt
+def likes(request, post_id):
+    if request.method == "POST":
+        like = json.loads(request.body)
+        if like["liked"] == False:
+            try:
+                l = Like.objects.get(liker=request.user, status=True, post=Post.objects.get(pk=like["post_id"]))
+                l.status = False
+                l.save()
+            except:
+                l = Like.objects.filter(liker=request.user, status=True, post=Post.objects.get(pk=like["post_id"])).first()
+                l.delete()
+                l = Like.objects.get(liker=request.user, status=True, post=Post.objects.get(pk=like["post_id"]))
+                l.status = False
+                l.save()
+        else:
+            try:
+                l = Like.objects.get(liker=request.user, status=False, post=Post.objects.get(pk=like["post_id"]))
+                l.status = True
+                l.save()
+            except:
+                l = Like.objects.create(liker=request.user, status=like["liked"], post=Post.objects.get(pk=like["post_id"]))
+    try:
+        post_liked = Like.objects.get(liker=request.user, post=Post.objects.get(pk=post_id)).status
+    except:
+        post_liked = False
+    return JsonResponse({
+        "post_id": post_id,
+        "post_likes": Like.objects.filter(status=True, post=Post.objects.get(pk=post_id)).count(),
+        "post_liked": post_liked,
+    }, safe=False)
 
 
 def login_view(request):
@@ -116,7 +150,7 @@ def register(request):
         return render(request, "network/register.html")
 
 
-def user(request, user):
+def user(_, user):
     profile_user = User.objects.get(username=user)
     return JsonResponse({
         "followers": Follow.objects.filter(following_user=profile_user).count(),
