@@ -1,8 +1,8 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <h2>{{ user }}'s Profile</h2>
-    <table>
+    <h3 class="ml-3">{% if user == request.user.username %}Your Profile{% else %}{{ user }}{% endif %}</h3>
+    <table class="ml-3">
         <thead>
             <tr>
                 <th class="border p-1">Followers</th>
@@ -11,31 +11,41 @@
         </thead>
         <tbody>
             <tr>
-                <td class="border text-center">0</td>
-                <td class="border text-center">0</td>
+                <td id="follower-num" class="border text-center">{{ followers }}</td>
+                <td id="following-num" class="border text-center">{{ following }}</td>
+                <td>
+                    {% if request.user.username != user and request.user.is_authenticated %}
+                    <button class="ml-3 btn btn-primary" id="follow">
+                    {% if not f_status %}
+                    Follow
+                    {% else %}
+                    Un-Follow
+                    {% endif %}
+                    </button>
+                    {% endif %}
+                </td>
             </tr>
         </tbody>
-    </table><br>
-    {% if request.user.username != user and request.user.is_authenticated %}
-    <button id="follow">Follow</button>
-    {% endif %}
+    </table>
     <div class="posts">
         {% for post in posts reversed %}
         <div class="border m-3 p-3">
             <h5>{{ post.poster }}</h5>
             {% if request.user == post.poster %}
-                <a href="#" id="edit_post{{ post.pk }}" class="edit" data-post_id="{{ post.pk }}">Edit</a><br>
+                <button id="edit_post{{ post.pk }}" class="edit btn btn-primary" data-post_id="{{ post.pk }}">Edit</button><br>
                 <form action="{% url 'profile' request.user %}" method="POST" id="edit_field{{ post.pk }}" class="edit_field">
                     {% csrf_token %}
-                    <textarea name="post_contents" class="form-control">{{ post.post }}</textarea><br>
-                    <input type="hidden" name="post_id" value="{{post.pk}}">
-                    <button type="submit">Save Changes</button>
+                    <textarea name="post_contents" class="form-control mb-1">{{ post.post }}</textarea>
+                    <input type="hidden" name="post_id" value="{{ post.pk }}">
+                    <button class="btn btn-primary" type="submit">Save Changes</button>
                 </form>
             {% endif %}
-            <div id="post_body{{ post.pk }}">{{ post.post }}</div><br>
+            <div id="post_body{{ post.pk }}"><h3>{{ post.post }}</h3></div>
             <div class="text-muted">{{ post.datetime }}</div>
             <a href="#">Comment</a>
         </div>
+        {% empty %}
+        <div class="m-3 p-3"><h5>No posts to display.</h5></div>
         {% endfor %}
     </div>
 {% endblock %}

@@ -7,7 +7,7 @@
         <form action="{% url 'index' %}" id="user_post" method="POST">
             {% csrf_token %}
             <h4>New post</h4>
-            <textarea class="form-control" placeholder="Enter new post here" required name="new_post"></textarea><br>
+            <textarea class="form-control" placeholder="Write a new post..." autofocus required name="new_post"></textarea><br>
             <input class="btn btn-primary" type="submit" value="Post">
             {% if message %}
             <strong>{{ message }}</strong>
@@ -20,17 +20,21 @@
         <div class="border m-3 p-3">
             <h5><a href="{% url 'profile' post.poster.username %}">{{ post.poster }}</a></h5>
             {% if request.user == post.poster %}
-                <a href="#" id="edit_post{{ post.pk }}" class="edit" data-post_id="{{ post.pk }}">Edit</a><br>
+                <button id="edit_post{{ post.pk }}" class="edit btn btn-primary" data-post_id="{{ post.pk }}">Edit</button><br>
                 <form action="{% url 'index' %}" method="POST" id="edit_field{{ post.pk }}" class="edit_field">
                     {% csrf_token %}
-                    <textarea name="post_contents" class="form-control">{{ post.post }}</textarea><br>
+                    <textarea name="post_contents" class="form-control mb-1">{{ post.post }}</textarea>
                     <input type="hidden" name="post_id" value="{{ post.pk }}">
-                    <button type="submit">Save Changes</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </form>
             {% endif %}
-            <div id="post_body{{ post.pk }}">{{ post.post }}</div><br>
+            <div id="post_body{{ post.pk }}"><h3>{{ post.post }}</h3></div>
             <div class="text-muted">{{ post.datetime }}</div>
             <a href="#">Comment</a>
+        </div>
+        {% empty %}
+        <div class="m-3 p-3">
+            <h5>No posts to display.</h5>
         </div>
         {% endfor %}
     </div>
