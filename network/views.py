@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -36,20 +36,16 @@ def profile(request, user):
             p.save()
         elif request.body:
             follow = json.loads(request.body)
-            print(follow["follow"])
             if follow["follow"]:
-                print('Following')
                 f = Follow(user=request.user, following_user=User.objects.get(username=user))
                 f.save()
             elif not follow["follow"]:
-                print('Unfollowing')
                 f = Follow.objects.get(user=request.user, following_user=User.objects.get(username=user))
                 f.delete()
     profile_user = User.objects.get(username=user)
     posts = Post.objects.filter(poster=profile_user).order_by('datetime')
     followers = Follow.objects.filter(following_user=profile_user).count()
     following = Follow.objects.filter(user=profile_user).count()
-    print(following)
     try:
         Follow.objects.get(user=request.user, following_user=User.objects.get(username=user))
         f_status = True
@@ -118,3 +114,11 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+def user(request, user):
+    profile_user = User.objects.get(username=user)
+    return JsonResponse({
+        "followers": Follow.objects.filter(following_user=profile_user).count(),
+        "following": Follow.objects.filter(user=profile_user).count()
+    }, safe=False)
