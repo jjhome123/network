@@ -1,38 +1,60 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-<h3 class="ml-3">Posts from Users you Follow</h3>
-<div class="ml-3">
-    <div class="posts">
-        {% for post in posts reversed %}
-        <div class="border m-3 p-3">
-            <h5><a href="{% url 'profile' post.poster.username %}">{{ post.poster }}</a></h5>
-            {% if request.user == post.poster %}
-                <button id="edit_post{{ post.pk }}" class="edit btn btn-primary" data-post_id="{{ post.pk }}">Edit</button><br>
-                <form action="{% url 'index' %}" method="POST" id="edit_field{{ post.pk }}" class="edit_field">
-                    {% csrf_token %}
-                    <textarea name="post_contents" class="form-control mb-1">{{ post.post }}</textarea>
-                    <input type="hidden" name="post_id" value="{{ post.pk }}">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </form>
-            {% endif %}
-            <div id="post_body{{ post.pk }}"><h3>{{ post.post }}</h3></div>
-            <div class="likes">
-                {% if request.user.is_authenticated %}
-                <span class="like_button" id="like{{ post.pk }}" data-like_id="{{ post.pk }}">🤍</span>
-                {% else %}
-                <span>❤️</span>
+    <h3 class="ml-3">Posts from Users you Follow</h3>
+    <div class="ml-3">
+        <div class="posts">
+            {% for post in posts reversed %}
+            <div class="border m-3 p-3">
+                <h5><a href="{% url 'profile' post.poster.username %}">{{ post.poster }}</a></h5>
+                {% if request.user == post.poster %}
+                    <button id="edit_post{{ post.pk }}" class="edit btn btn-primary" data-post_id="{{ post.pk }}">Edit</button><br>
+                    <form action="{% url 'index' %}" method="POST" id="edit_field{{ post.pk }}" class="edit_field">
+                        {% csrf_token %}
+                        <textarea name="post_contents" class="form-control mb-1">{{ post.post }}</textarea>
+                        <input type="hidden" name="post_id" value="{{ post.pk }}">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
                 {% endif %}
-                <span><span class="like_num" id="like-count{{ post.pk }}" data-num_id="{{ post.pk }}">0</span> likes</span>
+                <div id="post_body{{ post.pk }}"><h3>{{ post.post }}</h3></div>
+                <div class="likes">
+                    {% if request.user.is_authenticated %}
+                    <span class="like_button" id="like{{ post.pk }}" data-like_id="{{ post.pk }}">🤍</span>
+                    {% else %}
+                    <span>❤️</span>
+                    {% endif %}
+                    <span><span class="like_num" id="like-count{{ post.pk }}" data-num_id="{{ post.pk }}">0</span> likes</span>
+                </div>
+                <div class="text-muted">{{ post.datetime }}</div>
+                <a href="#">Comment</a>
             </div>
-            <div class="text-muted">{{ post.datetime }}</div>
-            <a href="#">Comment</a>
+            {% empty %}
+            <div class="m-3 p-3">
+                <h5>No posts to display.</h5>
+            </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="m-3 p-3">
-            <h5>No posts to display.</h5>
-        </div>
-        {% endfor %}
     </div>
-</div>
+    <nav>
+        <ul class="pagination">
+            {% if current_page == 1 %}
+                <li class="page-item disabled"><a class="page-link">Previous</a></li>
+            {% else %}
+                <li class="page-item"><a class="page-link" href="/{{ previous_page }}">Previous</a></li>
+            {% endif %}
+
+            {% for page in pages %}
+                {% if page == current_page %}
+                    <li class="page-item active"><a class="page-link" href="{% url 'following_page' page %}">{{ page }}</a></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="{% url 'following_page' page %}">{{ page }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if current_page == pages|length %}
+            <li class="page-item disabled"><a class="page-link">Next</a></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="/{{ next_page }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
 {% endblock %}

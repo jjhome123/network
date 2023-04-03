@@ -59,7 +59,7 @@ def index(request, pg=1):
 
 
 @csrf_exempt
-def profile(request, user):
+def profile(request, user, pg=1):
     if request.method == 'POST':
         if request.POST.get("post_contents"):
             p = Post(pk=request.POST.get("post_id"), poster=request.user)
@@ -74,7 +74,12 @@ def profile(request, user):
                 f = Follow.objects.get(user=request.user, following_user=User.objects.get(username=user))
                 f.delete()
     profile_user = User.objects.get(username=user)
-    posts = Post.objects.filter(poster=profile_user).order_by('datetime')
+    posts = []
+    list = Post.objects.filter(poster=profile_user).order_by('-datetime')
+    for item in list:
+        posts.append(item)
+    page = Paginator(posts, 10)
+    pages = range(1, page.num_pages+1)
     followers = Follow.objects.filter(following_user=profile_user).count()
     following = Follow.objects.filter(user=profile_user).count()
     try:
@@ -83,11 +88,15 @@ def profile(request, user):
     except:
         f_status = False
     return render(request, "network/profile.html",{
-        "posts": posts,
+        "posts": page.page(pg),
         "user": profile_user.username,
         "followers": followers,
         "following": following,
-        "f_status": f_status
+        "f_status": f_status,
+        "pages": pages,
+        "current_page": pg,
+        "previous_page": pg-1,
+        "next_page": pg+1
     })
 
 
@@ -188,13 +197,20 @@ def user(_, user):
     }, safe=False)
 
 
-def following(request):
+def following(request, pg=1):
     f = Follow.objects.filter(user=request.user)
     print(f)
-    fp = []
+    posts = []
     for user in f:
-        fp += Post.objects.filter(poster=user.following_user)
-    fp.sort(key=time_sort)
+        posts += Post.objects.filter(poster=user.following_user)
+    posts.sort(key=time_sort)
+    page = Paginator(posts, 10)
+    print(page.page(pg))
+    pages = range(1, page.num_pages+1)
     return render(request, "network/following.html", {
-        "posts": fp
+        "posts": page.page(pg),
+        "pages": pages,
+        "current_page": pg,
+        "previous_page": pg-1,
+        "next_page": pg+1
     })
