@@ -1,11 +1,48 @@
 document.addEventListener('DOMContentLoaded', () => {
+    
     // Adds edit functionality to edit buttons on profile or index page
     edit = document.querySelectorAll('.edit');
     edit.forEach(edit => {
         edit.addEventListener('click', () => {
-            edit_entry(edit.dataset.post_id)
+            field = document.querySelector(`#edit_field${edit.dataset.post_id}`);
+            post_body = document.querySelector(`#post_body${edit.dataset.post_id}`);
+            field.style.display = 'block';
+            post_body.style.display = 'none';
         });
     });
+    e_button = document.querySelectorAll('.edit-button');
+    e_button.forEach(button => {
+        button.addEventListener('click', () => {            
+            csrftoken = button.parentElement.firstElementChild.value; // This is the csrf token value
+            request = new Request(
+                `/post/${button.dataset.button_num}`,
+                {
+                    method: "POST",
+                    headers: {"X-CSRFToken": csrftoken},
+                }
+            );
+            fetch(request, {
+                body: JSON.stringify({
+                    post_id: button.dataset.button_num,
+                    post: document.querySelector(`#edit_post_body${button.dataset.button_num}`).value,
+                })
+            })
+
+            setTimeout(() => {
+                fetch(`/post/${button.dataset.button_num}`)
+                .then(response => {
+                    return response.json()
+                })
+                .then(result => {
+                    document.querySelector(`#post_body${button.dataset.button_num}`).firstElementChild.innerHTML = result["post"];
+                    field = document.querySelector(`#edit_field${button.dataset.button_num}`);
+                    post_body = document.querySelector(`#post_body${button.dataset.button_num}`);
+                    field.style.display = 'none';
+                    post_body.style.display = 'block';
+                })
+            }, 150)
+        })
+    })
 
     // Adds follow functionality to follow button on profile page
     follows();
@@ -13,17 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Adds like functionality to like buttons on profile or index page
     likes();
 
-    // Adds pagination to views
-    
 });
 
-function edit_entry(post_id) {
-    field = document.querySelector(`#edit_field${post_id}`);
-    post_body = document.querySelector(`#post_body${post_id}`)
-    field.style.display = 'block';
-    field.focus();
-    post_body.style.display = 'none';
-}
 
 function likes() {
     like = document.querySelectorAll('.like_button');
@@ -96,6 +124,7 @@ function likes() {
     });
 }
 
+
 function follows() {
     user = document.querySelector('h5').innerHTML;
     if (document.querySelector('h3').innerHTML !== 'Your Profile') {
@@ -109,8 +138,8 @@ function follows() {
                             follow: true
                         })
                     })
-                    follow_button.innerHTML = 'Un-Follow';
-                } else if (follow_button.innerHTML.includes('Un-Follow')) {
+                    follow_button.innerHTML = 'Unfollow';
+                } else if (follow_button.innerHTML.includes('Unfollow')) {
                     fetch(`/profile/${user}`, {
                         method: "POST",
                         body: JSON.stringify({

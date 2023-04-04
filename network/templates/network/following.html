@@ -4,7 +4,7 @@
     <h3 class="ml-3">Posts from Users you Follow</h3>
     <div class="ml-3">
         <div class="posts">
-            {% for post in posts reversed %}
+            {% for post in posts %}
             <div class="border m-3 p-3">
                 <h5><a href="{% url 'profile' post.poster.username %}">{{ post.poster }}</a></h5>
                 {% if request.user == post.poster %}
@@ -26,7 +26,6 @@
                     <span><span class="like_num" id="like-count{{ post.pk }}" data-num_id="{{ post.pk }}">0</span> likes</span>
                 </div>
                 <div class="text-muted">{{ post.datetime }}</div>
-                <a href="#">Comment</a>
             </div>
             {% empty %}
             <div class="m-3 p-3">

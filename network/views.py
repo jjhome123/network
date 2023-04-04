@@ -4,28 +4,15 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-import json
+import json, datetime
 from django.core.paginator import Paginator
 from .models import User, Post, Like, Follow
 
 
-def time_sort(obj):
-    return obj.datetime
-
-
 def index(request, pg=1):
     if request.method == "POST":
-        if request.POST.get("post_contents"):
-            p = Post(pk=request.POST.get("post_id"), poster=request.user)
-            p.post = request.POST.get("post_contents")
-            p.save()
-            posts = []
-            list = Post.objects.all().order_by('-datetime')
-            for item in list:
-                posts.append(item)
-            page = Paginator(posts, 10)
-            pages = range(1, page.num_pages+1)
-        elif not request.POST.get("new_post"):
+        print('running this view')
+        if not request.POST.get("new_post"):
             posts = []
             list = Post.objects.all().order_by('-datetime')
             for item in list:
@@ -49,28 +36,29 @@ def index(request, pg=1):
         posts.append(item)
     page = Paginator(posts, 10)
     pages = range(1, page.num_pages+1)
+    print('about to render index')
     return render(request, "network/index.html", {
-        "posts": page.page(pg),
+        "posts": page.get_page(pg),
         "pages": pages,
         "current_page": pg,
         "previous_page": pg-1,
         "next_page": pg+1
     })
 
-
 @csrf_exempt
 def profile(request, user, pg=1):
     if request.method == 'POST':
+        print('this is running for some reason')
         if request.POST.get("post_contents"):
             p = Post(pk=request.POST.get("post_id"), poster=request.user)
             p.post = request.POST.get("post_contents")
             p.save()
         elif request.body:
-            follow = json.loads(request.body)
-            if follow["follow"]:
+            data = json.loads(request.body)
+            if data["follow"]:
                 f = Follow(user=request.user, following_user=User.objects.get(username=user))
                 f.save()
-            elif not follow["follow"]:
+            elif not data["follow"]:
                 f = Follow.objects.get(user=request.user, following_user=User.objects.get(username=user))
                 f.delete()
     profile_user = User.objects.get(username=user)
@@ -100,6 +88,27 @@ def profile(request, user, pg=1):
     })
 
 
+def following(request, pg=1):
+    f = Follow.objects.filter(user=request.user)
+    users = []
+    for user in f:
+        users.append(user.following_user.username)
+    user_posts = User.objects.filter(username__in=users)
+    posts = []
+    list = Post.objects.filter(poster__in=user_posts).order_by('-datetime')
+    for item in list:
+        posts.append(item)
+    page = Paginator(list, 10)
+    pages = range(1, page.num_pages+1)
+    return render(request, "network/following.html", {
+        "posts": page.page(pg),
+        "pages": pages,
+        "current_page": pg,
+        "previous_page": pg-1,
+        "next_page": pg+1
+    })
+
+
 @csrf_exempt
 def likes(request, post_id):
     if request.method == "POST":
@@ -110,8 +119,10 @@ def likes(request, post_id):
                 l.status = False
                 l.save()
             except:
-                l = Like.objects.filter(liker=request.user, status=True, post=Post.objects.get(pk=like["post_id"])).first()
-                l.delete()
+                Like.objects.create(liker=request.user, status=True, post=Post.objects.get(pk=like["post_id"]))
+                while Like.objects.filter(liker=request.user, status=True, post=Post.objects.get(pk=like["post_id"])).count() > 1:
+                    l = Like.objects.filter(liker=request.user, status=True, post=Post.objects.get(pk=like["post_id"])).first()
+                    l.delete()
                 l = Like.objects.get(liker=request.user, status=True, post=Post.objects.get(pk=like["post_id"]))
                 l.status = False
                 l.save()
@@ -122,10 +133,21 @@ def likes(request, post_id):
                 l.save()
             except:
                 l = Like.objects.create(liker=request.user, status=like["liked"], post=Post.objects.get(pk=like["post_id"]))
-    try:
-        post_liked = Like.objects.get(liker=request.user, post=Post.objects.get(pk=post_id)).status
-    except:
-        post_liked = False
+    if request.user.is_authenticated:
+        try:
+            post_liked = Like.objects.get(liker=request.user, post=Post.objects.get(pk=post_id)).status
+        except:
+            l = Like.objects.create(liker=request.user, status=False, post=Post.objects.get(pk=post_id))
+            post_liked = l.status
+    
+        # Prevents multiple like objects with a user being associated with a post
+        while Like.objects.filter(liker=request.user, post=Post.objects.get(pk=post_id)).count() > 1:
+            print('its deletin time')
+            l = Like.objects.filter(liker=request.user, post=Post.objects.get(pk=post_id)).first()
+            l.delete()
+    else:
+        post_liked = None
+
     return JsonResponse({
         "post_id": post_id,
         "post_likes": Like.objects.filter(status=True, post=Post.objects.get(pk=post_id)).count(),
@@ -197,20 +219,15 @@ def user(_, user):
     }, safe=False)
 
 
-def following(request, pg=1):
-    f = Follow.objects.filter(user=request.user)
-    print(f)
-    posts = []
-    for user in f:
-        posts += Post.objects.filter(poster=user.following_user)
-    posts.sort(key=time_sort)
-    page = Paginator(posts, 10)
-    print(page.page(pg))
-    pages = range(1, page.num_pages+1)
-    return render(request, "network/following.html", {
-        "posts": page.page(pg),
-        "pages": pages,
-        "current_page": pg,
-        "previous_page": pg-1,
-        "next_page": pg+1
-    })
+def post(request, post_id): 
+    if request.method == "POST":
+        user_post = json.loads(request.body)   
+        p = Post.objects.get(pk=user_post["post_id"])
+        p.post = user_post["post"]
+        p.save()
+        return HttpResponse('')
+    elif request.method == "GET":
+        return JsonResponse({
+            "post": Post.objects.get(pk=post_id).post,
+            "post_id": post_id,
+        }, safe=False)

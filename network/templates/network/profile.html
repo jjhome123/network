@@ -33,11 +33,11 @@
             <h5>{{ post.poster }}</h5>
             {% if request.user == post.poster %}
                 <button id="edit_post{{ post.pk }}" class="edit btn btn-primary" data-post_id="{{ post.pk }}">Edit</button><br>
-                <form action="{% url 'index' %}" method="POST" id="edit_field{{ post.pk }}" class="edit_field">
+                <form id="edit_field{{ post.pk }}" class="edit_field">
                     {% csrf_token %}
-                    <textarea name="post_contents" class="form-control mb-1">{{ post.post }}</textarea>
+                    <textarea name="post_contents" id="edit_post_body{{ post.pk }}" class="form-control mb-1">{{ post.post }}</textarea>
                     <input type="hidden" name="post_id" value="{{ post.pk }}">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" data-button_num="{{ post.pk }}" class="btn btn-primary edit-button">Save Changes</button>
                 </form>
             {% endif %}
             <div id="post_body{{ post.pk }}"><h3>{{ post.post }}</h3></div>
@@ -47,9 +47,9 @@
                 {% else %}
                 <span>❤️</span>
                 {% endif %}
-                <span><span class="like_num" id="like-count{{ post.pk }}" data-num_id="{{ post.pk }}">0</span> likes</span>
+                <span><span class="like_num" id="like-count{{ post.pk }}" data-num_id="{{ post.pk }}"></span> likes</span>
             </div>
-            <div class="text-muted">{{ post.datetime }}</div>
+            <div class="text-muted" id="datetime{{ post.pk }}">{{ post.datetime }}</div>
         </div>
         {% empty %}
         <div class="m-3 p-3">

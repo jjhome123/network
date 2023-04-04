@@ -10,7 +10,7 @@ class Post(models.Model):
     datetime = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"(Post {self.id} | Created by: {self.poster} on {self.datetime})"
+        return f"({self.pk}){self.poster}:{self.datetime}"
 
 class Like(models.Model):
     liker = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None, related_name="liked_posts")
