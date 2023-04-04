@@ -67,9 +67,9 @@
 
             {% for page in pages %}
                 {% if page == current_page %}
-                    <li class="page-item active"><a class="page-link" href="{% url 'profile_page' request.user.username page %}">{{ page }}</a></li>
+                    <li class="page-item active"><a class="page-link" href="{% url 'profile_page' user page %}">{{ page }}</a></li>
                 {% else %}
-                    <li class="page-item"><a class="page-link" href="{% url 'profile_page' request.user.username page %}">{{ page }}</a></li>
+                    <li class="page-item"><a class="page-link" href="{% url 'profile_page' user page %}">{{ page }}</a></li>
                 {% endif %}
             {% endfor %}
             {% if current_page == pages|length %}
